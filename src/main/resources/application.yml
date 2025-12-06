@@ -1,17 +1,56 @@
+#spring:
+#  datasource:
+#    # When running in Docker: value comes from env SPRING_DATASOURCE_URL
+#    # When running from IDE: default is localhost:1521/FREEPDB1
+#    url: ${SPRING_DATASOURCE_URL:jdbc:oracle:thin:@localhost:1521/FREEPDB1}
+#    username: ${SPRING_DATASOURCE_USERNAME:NVB_DOCS_OWNER}
+#    password: ${SPRING_DATASOURCE_PASSWORD:docs_owner_pass}
+#    driver-class-name: oracle.jdbc.OracleDriver
+#    hikari:
+#      minimum-idle: 2
+#      maximum-pool-size: 5
+#      idle-timeout: 30000
+#      connection-timeout: 30000
+#      pool-name: OracleHikariPool
+#
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    properties:
+#      hibernate:
+#        dialect: org.hibernate.dialect.OracleDialect
+#    show-sql: true
+#
+#  flyway:
+#    enabled: true
+#    locations: classpath:db/migration
+#    default-schema: NVB_DOCS_OWNER
+
+
 spring:
+  application:
+    name: scheduler-service
+
   datasource:
-    # When running in Docker: value comes from env SPRING_DATASOURCE_URL
-    # When running from IDE: default is localhost:1521/FREEPDB1
-    url: ${SPRING_DATASOURCE_URL:jdbc:oracle:thin:@localhost:1521/FREEPDB1}
-    username: ${SPRING_DATASOURCE_USERNAME:NVB_DOCS_OWNER}
-    password: ${SPRING_DATASOURCE_PASSWORD:docs_owner_pass}
+    url: jdbc:oracle:thin:@localhost:1521/FREEPDB1
+    username: NVB_DOCS_OWNER
+    password: docs_owner_pass
     driver-class-name: oracle.jdbc.OracleDriver
-    hikari:
-      minimum-idle: 2
-      maximum-pool-size: 5
-      idle-timeout: 30000
-      connection-timeout: 30000
-      pool-name: OracleHikariPool
+
+    # these will be bound into PoolDataSourceProperties in currentle what we have style
+    connection-factory-class-name: oracle.jdbc.pool.OracleDataSource
+    connection-pool-name: ${spring.application.name}-db-pool
+    initial-pool-size: 2
+    min-pool-size: 2
+    max-pool-size: 5
+    abandoned-connection-timeout: 10
+    connection-wait-timeout: 10
+    inactive-connection-timeout: 120
+    max-connection-reuse-count: 300
+    max-connection-reuse-time: 1800
+    timeout-check-interval: 60
+    validate-connection-on-borrow: true
+
 
   jpa:
     hibernate:

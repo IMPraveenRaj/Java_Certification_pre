@@ -1,0 +1,37 @@
+version: "3.8"
+
+services:
+  oracle-db:
+    image: gvenzl/oracle-free:latest
+    container_name: oracle-db
+    environment:
+      # SYSTEM user password (same as your docker run)
+      ORACLE_PASSWORD: MyPass123
+
+      # App schema/user (Flyway + Spring will use this)
+      APP_USER: NVB_DOCS_OWNER
+      APP_USER_PASSWORD: docs_owner_pass
+
+    ports:
+      - "1521:1521"    # expose Oracle to host on 1521
+
+    healthcheck:
+      # check using APP_USER on FREEPDB1
+      test: ["CMD-SHELL", "echo 'select 1 from dual;' | sqlplus -s NVB_DOCS_OWNER/docs_owner_pass@localhost/FREEPDB1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 30
+
+  app:
+    build: .
+    container_name: java-certification-pre-app
+    depends_on:
+      oracle-db:
+        condition: service_healthy
+    environment:
+      # Inside Docker network we talk to host "oracle-db"
+      SPRING_DATASOURCE_URL: jdbc:oracle:thin:@oracle-db:1521/FREEPDB1
+      SPRING_DATASOURCE_USERNAME: NVB_DOCS_OWNER
+      SPRING_DATASOURCE_PASSWORD: docs_owner_pass
+    ports:
+      - "8080:8080"
